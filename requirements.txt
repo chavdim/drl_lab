@@ -1,0 +1,6 @@
+flake8
+Keras
+numpy
+sklearn
+tensorflow
+opencv-python
