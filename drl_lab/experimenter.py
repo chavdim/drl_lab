@@ -26,26 +26,29 @@ class Experiment():
     def run(self, param_dict={}, nn_params={}, num_run=-1):
         self.params = param_dict
         self.nn_params = nn_params
+
         interval = param_dict["run_interval"]
         run_steps = param_dict["max_steps"]
         log = param_dict["log"]
         save = param_dict["save"]
         load_model = param_dict["load_model"]
+
         if save:
             self.save_params()
         if num_run == -1:
             num_run = param_dict["num_runs"]
 
         best_score = -100000
+
         self.simulation = main.Sim(self.env, nn_params, param_dict)
         # self.simulation = doubleEnvs.Sim(self.env,nn_params,param_dict)
 
         # save untrained model
-        if not save:
+        if save:
             self.save_current_model_at_step(
                 num_run=num_run, step_num=self.simulation.agent.step_counter)
 
-        if not load_model:
+        if load_model:
             self.simulation.loadModel(load_model)
 
         average_rewards = []
@@ -54,6 +57,7 @@ class Experiment():
         r = self.simulation.run_iterations(iterations=interval, doUpdate=False)
         r = np.mean(r)  # random agent baseline ( random dqn weights )
         average_rewards.append(r)
+
         while True:
             steps0 = self.simulation.agent.step_counter
             t0 = time.time()
@@ -74,16 +78,18 @@ class Experiment():
                       np.round(self.simulation.agent.exploreChance, 2),
                       "steps/sec: ", np.round(step_per_sec, 2),
                       "remaining min: ", remaining_min)
+
             average_rewards.append(mr)
 
             # save best
-            if mr > best_score and not save:
+            if mr > best_score and save:
                 if log:
                     print("new best score, saving model...")
                 self.save_current_model(num_run=num_run)
                 best_score = mr
+
             # save en route
-            if not save:
+            if save:
                 for ratio in save:
                     if ratio*run_steps == self.simulation.agent.step_counter:
                         self.save_current_model_at_step(

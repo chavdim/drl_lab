@@ -121,7 +121,7 @@ def observation_preprocess(observation, zoom=[1, 1], opt_flow=0, prev_obs=None,
                 obs_preprocessed[0:, 0:, 0] = gray
                 obs_preprocessed[0:, 0:, 1] = of[0:, 0:, 0]/10
                 obs_preprocessed[0:, 0:, 2] = of[0:, 0:, 1]/10
-            elif not toGrayScale:
+            else:
                 for i in opt_flow:
                     # add x,y flow one or both depending
                     # on opt flow parameter ([0, 1] for both)
@@ -163,6 +163,7 @@ class Memory:
 
         self.storage[self.currentRow] = all_data
         self.currentRow += 1
+
         if self.currentRow == self.maxSize:  # reset when full
             self.full()
 
@@ -326,7 +327,7 @@ class Sim:
                 if doUpdate:
                     self.agent.exploreChance *= 0.9
             return episodeReward
-        if not testAgent:
+        else:
             return episodeReward
 
     def runIterations(self, testAgent=False, doUpdate=False, iterations=1000):
@@ -389,11 +390,12 @@ class Sim:
             if opt_flow:
                 if reseting == 0:
                     gray = rgb2gray(obs2)
-                    # TODO: Shorten the code below
-                    of = cv2.calcOpticalFlowFarneback(prev_state[0:, 0:, 0]*255,
-                            gray*255, None, 0.5, 3, 5, 3, 5, 1.2, 0)
-                    # of = cv2.calcOpticalFlowFarneback(rgb2gray(prev_state)*255,
-                    #        gray*255,None,0.5, 3, 5, 3, 5, 1.2, 0)
+                    of = cv2.calcOpticalFlowFarneback(
+                        prev_state[0:, 0:, 0]*255,
+                        gray*255, None, 0.5, 3, 5, 3, 5, 1.2, 0)
+                    # of = cv2.calcOpticalFlowFarneback(
+                    #   rgb2gray(prev_state)*255,
+                    #   gray*255,None,0.5, 3, 5, 3, 5, 1.2, 0)
                     obs2[0:, 0:, 0] = gray
                     obs2[0:, 0:, 1] = of[0:, 0:, 0]/10
                     obs2[0:, 0:, 2] = of[0:, 0:, 1]/10
