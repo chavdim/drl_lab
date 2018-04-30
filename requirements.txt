@@ -1,6 +1,9 @@
 flake8
+gym
 Keras
+matplotlib
 numpy
-sklearn
+scikit-image
+scikit-learn
 tensorflow
 opencv-python
