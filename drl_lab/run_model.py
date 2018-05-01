@@ -6,6 +6,7 @@ import gym_ple
 from skimage.transform import rescale
 
 env_name = 'PixelCopter-v0'
+run_for = 400
 
 obsShape = [60,60,3]# cropped , rescaled 
 zoom = [1,1]
@@ -23,3 +24,8 @@ env = gym.make(env_name)
 env.seed()
 observation = env.reset()
 observation = rescale(observation,zoom)
+action = 0
+
+for i in range(run_for):
+	observation, reward, done, info = env.step(action)
+	action = qnn.getBest
