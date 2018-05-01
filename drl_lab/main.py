@@ -4,9 +4,6 @@ import gym,random,time
 from gym import wrappers
 #
 import qnn_agent
-#from mpl_toolkits.mplot3d import Axes3D
-import matplotlib.pyplot as plt
-#import mpl_toolkits.mplot3d.axes3d as p3
 
 import random
 import numpy as np
@@ -39,55 +36,8 @@ from keras.models import Sequential
 from keras.layers import Dense, Activation
 
 import numpy as np
-import matplotlib.pyplot as plt
+#import matplotlib.pyplot as plt
 
-from matplotlib.backends.backend_agg import FigureCanvasAgg as FigureCanvas
-from matplotlib.figure import Figure
-def normalize(x):
-    # utility function to normalize a tensor by its L2 norm
-    return x / (K.sqrt(K.mean(K.square(x))) + 1e-5)
-
-def target_category_loss(x, category_index, nb_classes):
-
-    return tf.multiply(x, K.one_hot([category_index], nb_classes))
-def target_category_loss_output_shape(input_shape):
-    return input_shape
-def grad_cam(input_model, image, category_index, layer_name,nb_classes):
-    model = Sequential()
-    model.add(input_model)
-
-    nb_classes = nb_classes
-    target_layer = lambda x: target_category_loss(x, category_index, nb_classes)
-    model.add(Lambda(target_layer,
-                     output_shape = target_category_loss_output_shape))
-
-    loss = K.sum(model.layers[-1].output)
-   
-    #print(model.layers[0].layers)
-    conv_output =  [l for l in model.layers[0].layers if l.name == layer_name][0].output
-    grads = normalize(K.gradients(loss, conv_output)[0])
-    gradient_function = K.function([model.layers[0].input], [conv_output, grads])
-
-    output, grads_val = gradient_function([image])
-    output, grads_val = output[0, :], grads_val[0, :, :, :]
-
-    weights = np.mean(grads_val, axis = (0, 1))
-    cam = np.ones(output.shape[0 : 2], dtype = np.float32)
-
-    for i, w in enumerate(weights):
-        cam += w * output[:, :, i]
-
-    #cam = cv2.resize(cam, (224, 224))
-    #cam_sm = np.copy(cam)
-    #cam_sm = np.maximum(cam_sm, 0)
-    #cam_sm = cam_sm / np.max(cam_sm)
-    
-    #cam = ndimage.interpolation.zoom(cam, (zm, zm), order=1)#order=3
-    #cam = cv2.resize(cam,(zm*cam.shape[0],zm*cam.shape[1]))
-    cam = np.maximum(cam, 0)
-    heatmap = cam / np.max(cam)
-
-    return heatmap
 #####    
     
 def observation_preprocess(observation,zoom=[1,1],opt_flow=0,prev_obs=None,toGrayScale=False):
@@ -119,52 +69,8 @@ def observation_preprocess(observation,zoom=[1,1],opt_flow=0,prev_obs=None,toGra
                 obs_preprocessed[0:,0:,1] =obs_preprocessed[0:,0:,1]*0
                 obs_preprocessed[0:,0:,2] =obs_preprocessed[0:,0:,2]*0
             
-        
-class Memory:
-    def __init__(self,s_shape,a_size,r_size,maxSize = 100000):
+from memory import *  
 
-        s_shape.insert(0,maxSize)
-        self.colSize = (a_size+r_size+1) #+1 for done boolean
-        #state storages
-        self.stateStorage = np.empty(s_shape,dtype='float32')
-        self.newStateStorage = np.empty(s_shape,dtype='float32')
-        #
-        self.storage = np.empty([maxSize,self.colSize],dtype='float32')
-        self.currentRow = 0
-        self.maxSize = maxSize
-        self.s_size = s_shape
-        self.a_size = a_size
-        self.filledOnce = False
-    def addData(self,s,a,s_new,r,done):
-        #all_data = np.append(s,a)
-        #all_data = np.append(all_data,s_new)
-        self.stateStorage[self.currentRow][0:,0:,0:] = np.copy(s)
-        self.newStateStorage[self.currentRow][0:,0:,0:] = np.copy(s_new)
-
-        #print(all_data)
-        all_data = np.append(a,r)
-        all_data = np.append(all_data,done)
-        
-        self.storage[self.currentRow] = all_data
-        self.currentRow += 1
-        if self.currentRow == self.maxSize: # reset when full
-            self.full()
-    def full(self):
-        self.currentRow = 0
-        self.filledOnce = True
-        print("memory full yo")
-    def getBatch(self,batchSize=10):
-        if self.filledOnce == False:
-            choices = np.random.randint(0,self.currentRow , size=batchSize)
-        else:
-            choices = np.random.randint(0,self.maxSize , size=batchSize)
-        
-        return  {"state":self.stateStorage[choices],
-                "action":self.storage[choices][0:,0:self.a_size],
-                "new_state":self.newStateStorage[choices],
-                "reward":self.storage[choices][0:,-2:-1],
-                "done":self.storage[choices][0:,-1:]
-                }
                 
 ###
 class Action:
@@ -182,10 +88,10 @@ class Sim:
         self.run_params = run_params
         # this is for custom actions, other wise remove upcoming loop 
         self.actions = [Action(0,[0,1],True), #left
-                        Action(1,[0,1],True),  #right
-                        Action(2,[0,1],True),
-                        Action(3,[0,1],True),
-                        Action(4,[0,1],True)
+                        Action(1,[0,1],True)  #right
+                        #Action(2,[0,1],True),
+                        #Action(3,[0,1],True),
+                        #Action(4,[0,1],True)
                         ]
         # use actions for all avaible actions in env
         self.actions = []
@@ -240,69 +146,7 @@ class Sim:
         self.agent.nn.nn = keras.models.load_model(name)
         self.agent.target_train()
         self.agent.exploreChance =  self.agent.exploration_final_eps
-    def runEpisode(self,testAgent=False, doUpdate=False):
-        self.env.seed()
-        observation = self.env.reset()
-        
-        #obs2 = observation
-        
-        obs2 = np.copy(observation/255.0)
-        
-
-        episodeReward = 0
-        all_rewards = []
-        episodeData = []
-        for t in range(self.episode_maxLength):
-            if self.skip_frame_timer == self.skip_frames:
-                if testAgent==False:
-                    if doUpdate:
-                        self.agent.update(self)
-                    t_before_action = time.time()
-                    action = self.agent.getNextAction(obs2)
-                    self.times["get_action"] += time.time() - t_before_action
-                elif testAgent==True:
-                    self.env.render()
-                    action  = self.agent.getBestAction(obs2)
-                self.skip_frame_timer = 0
-            self.skip_frame_timer += 1
-            self.lastAction = action
-            prev_state = np.copy(obs2)
-            observation, reward, done, info = self.env.step(action)
-            episodeReward += reward 
-            all_rewards.append(reward)
-            #print(reward)
-            obs2 = np.copy(observation/255.0)
-
-            r = reward
-            #### log rewards
-            self.temp_rews += r
-            if self.agent.step_counter % self.interval == 0:
-                self.rewards.append(np.mean(self.temp_rews))
-                self.temp_rews = 0
-            if self.agent.step_counter > self.max_iterations:
-                self.done=1
-            ####
-            r = np.clip(reward, -1, 1)
-            
-            if testAgent == False:
-                if self.skip_frame_timer == 1:
-                    self.experienceData.addData(prev_state,action,obs2,r,done)
-            if done:
-                self.skip_frame_timer = self.skip_frames
-
-                break
-            
-            if t == self.episode_maxLength:# never
-                print("episode max length reached")
-                
-        #self.env.close()
-        if testAgent == False:
-            if self.agent.exploreChance > self.agent.exploration_final_eps:
-                if doUpdate:
-                    self.agent.exploreChance *= 0.9
-            return episodeReward
-        if testAgent == True:
-            return episodeReward
+    
     def runIterations(self,testAgent=False, doUpdate=False,iterations=1000):
         self.env.seed()
         observation = self.env.reset()
@@ -318,6 +162,7 @@ class Sim:
             obs2[0:,0:,2] = obs2[0:,0:,2]*0
             #pass
         for t in range(iterations):
+            """
             self.camT +=1
             if self.camT >= self.collectCams and t!=0:
                 cam = grad_cam(self.agent.nn.nn,np.reshape(np.copy(obs2 ),(1,obs2.shape[1],obs2.shape[1],3)),
@@ -329,6 +174,7 @@ class Sim:
                 self.cams0MEAN.append(np.mean(cam))
                 self.cams1STD.append(np.std(cam1))
                 self.cams1MEAN.append(np.mean(cam1))
+            """
             if self.skip_frame_timer == self.skip_frames:
                 if testAgent==False:
                     if doUpdate:

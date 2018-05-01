@@ -7,10 +7,10 @@ Created on Sun Jan  7 12:07:14 2018
 """
 import experimenter
 import os
-import matplotlib.pyplot as plt
+#import matplotlib.pyplot as plt
 import numpy as np
 ####
-env = 'Breakout_pygame-v0'
+env = 'PixelCopter-v0'
 run_params = {"run_interval":2000,
               "max_steps":400000,
               "opt_flow":1,
@@ -31,7 +31,7 @@ nnetwork_params = {"architecture":[["conv",30,8,4],["conv",40,4,3],["conv",60,3,
 ############
 
 if __name__ == "__main__":
-    exp = experimenter.Experiment("breakout_cam2",env)
+    exp = experimenter.Experiment("ex_",env)
     exp.run(run_params,nn_params=nnetwork_params)
 
         

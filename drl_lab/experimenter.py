@@ -13,9 +13,6 @@ import numpy as np
 import keras
 import time # calculate learning times
 import os # folder creation for saving results
-import matplotlib.pyplot as plt # plotting results
-
-
 
 
 class Experiment():
@@ -38,7 +35,6 @@ class Experiment():
         #
         best_score = -100000
         self.simulation = main.Sim(self.env,nn_params,param_dict)
-        ###self.simulation = doubleEnvs.Sim(self.env,nn_params,param_dict)
         # save untrained model
         if save!=False:
             self.save_current_model_at_step(num_run=num_run,step_num = self.simulation.agent.step_counter)
@@ -47,10 +43,8 @@ class Experiment():
             self.simulation.loadModel(load_model)
         #
         average_rewards = []
-
         ####
         cams=[]
-        
         r = self.simulation.run_iterations(iterations = interval,doUpdate = False)
         r = np.mean(r) #random agent baseline ( random dqn weights )
         average_rewards.append(r)
@@ -92,7 +86,8 @@ class Experiment():
         if num_run > 1:
             self.run(param_dict,nn_params=nn_params,num_run=num_run-1)
         else:
-            self.plot_results()
+            pass
+            #self.plot_results()
     def save_params(self):
         curr_path = os.path.dirname(os.path.realpath(__file__))
         ### save rewards
@@ -132,9 +127,9 @@ class Experiment():
                 average_res = np.zeros((len(res),self.params["num_runs"]))
             average_res[0:,i-1] = res[0:average_res.shape[0]]
             plt.plot(range(0,average_res.shape[0]*self.params["run_interval"],self.params["run_interval"]),res[0:average_res.shape[0]],alpha=0.225)
-        plt.plot(range(0,average_res.shape[0]*self.params["run_interval"],self.params["run_interval"]),np.mean(average_res,axis=1))
+        ##plt.plot(range(0,average_res.shape[0]*self.params["run_interval"],self.params["run_interval"]),np.mean(average_res,axis=1))
         #plt.show()
-        plt.savefig(directory+"_plot.png")
+        ##plt.savefig(directory+"_plot.png")
 if __name__ == "__main__":
     exp = Experiment(env="PixelCopter-v0")
     exp.run()

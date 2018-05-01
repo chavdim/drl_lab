@@ -1,0 +1,2 @@
+{'run_interval': 2000, 'max_steps': 400000, 'opt_flow': 1, 'log': 1, 'save': [0.0, 0.3, 0.6, 1.0], 'num_runs': 1, 'load_model': 0}
+{'architecture': [['conv', 30, 8, 4], ['conv', 40, 4, 3], ['conv', 60, 3, 1], ['gap'], ['fc', 512]], 'learn_rate': 5e-05, 'optimizer': 'RMSprop'}
