@@ -48,7 +48,7 @@ def observation_preprocess(observation,zoom=[1,1],opt_flow=0,prev_obs=None,toGra
         obs_preprocessed = np.copy(rescale(observation,zoom))
     # add optical flow
     if opt_flow:
-        if prev_obs!="reseting":
+        if prev_obs!=[]:
             gray=rgb2gray(obs_preprocessed)
             of = cv2.calcOpticalFlowFarneback(rgb2gray(prev_obs)*255,
                                         gray*255,None,0.5, 3, 5, 3, 5, 1.2, 0)
@@ -62,7 +62,7 @@ def observation_preprocess(observation,zoom=[1,1],opt_flow=0,prev_obs=None,toGra
                     obs_preprocessed[0:,0:,3+i] =of[0:,0:,i]/10 
                     
                     
-        elif prev_obs=="reseting":
+        elif prev_obs==[]:
             gray=rgb2gray(obs_preprocessed)
             if toGrayScale:
                 obs_preprocessed[0:,0:,0] = gray
@@ -153,18 +153,20 @@ class Sim:
         self.env.seed()
         opt_flow=self.run_params["opt_flow"] # 1: add optical flow 
         observation = self.env.reset()
+        
         #observation = rescale(observation,self.zoom)
-        observation = observation_preprocess(observation,zoom=self.zoom,opt_flow=opt_flow,prev_obs="reseting")
+        observation = observation_preprocess(observation,zoom=self.zoom,opt_flow=opt_flow,prev_obs=[])
         obs2 = np.copy(observation)
         #
         all_rewards = []  
         reseting = 0
-        
+        """
         if opt_flow:
             obs2[0:,0:,0] = rgb2gray(obs2)
             obs2[0:,0:,1] = obs2[0:,0:,1]*0
             obs2[0:,0:,2] = obs2[0:,0:,2]*0
             #pass
+        """
         for t in range(iterations):
             """
             self.camT +=1
@@ -202,6 +204,7 @@ class Sim:
             #plt.imshow(obs2)
             #plt.show()
             ####OPTICAL FLOW
+            """
             if opt_flow:
                 if reseting==0:
                     gray=rgb2gray(obs2)
@@ -221,6 +224,7 @@ class Sim:
                     obs2[0:,0:,1] = obs2[0:,0:,1]*0
                     obs2[0:,0:,2] = obs2[0:,0:,2]*0
                     #pass
+            """
             reseting=0
             r = reward
             #### log rewards
@@ -240,13 +244,15 @@ class Sim:
 
                 self.env.seed()
                 observation = self.env.reset()
-                observation = observation_preprocess(observation,zoom=self.zoom,opt_flow=opt_flow,prev_obs="reseting")#rescale(observation,self.zoom)
+                observation = observation_preprocess(observation,zoom=self.zoom,opt_flow=opt_flow,prev_obs=[])#rescale(observation,self.zoom)
                 obs2 = np.copy(observation)
+                """
                 if opt_flow:
                     obs2[0:,0:,0] = rgb2gray(obs2)
                     obs2[0:,0:,1] = obs2[0:,0:,1]*0
                     obs2[0:,0:,2] = obs2[0:,0:,2]*0
                 reseting=1
+                """
             
            
                 
