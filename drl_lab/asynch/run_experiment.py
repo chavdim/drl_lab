@@ -31,7 +31,7 @@ nnetwork_params = {"architecture":[["conv",30,8,4],["conv",40,4,3],["conv",60,3,
 ############
 
 if __name__ == "__main__":
-    exp = experimenter.Experiment("ex_2",env)
+    exp = experimenter.Experiment("ex_",env)
     exp.run(run_params,nn_params=nnetwork_params)
 
         

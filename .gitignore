@@ -1,5 +1,6 @@
 # Created by https://www.gitignore.io/api/macos,python
-
+### results
+drl_lab/results
 ### macOS ###
 *.DS_Store
 .AppleDouble
