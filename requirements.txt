@@ -1,9 +1,10 @@
 flake8
-gym
 Keras
 matplotlib
 numpy
 scikit-image
 scikit-learn
-tensorflow
+tensorflow-gpu
 opencv-python
+imageio
+pygame

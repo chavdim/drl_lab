@@ -18,7 +18,7 @@ from keras.models import Sequential
 # import matplotlib.pyplot as plt
 # from matplotlib.backends.backend_agg import FigureCanvasAgg as FigureCanvas
 # from matplotlib.figure import Figure
-# import gym_ple
+import gym_ple
 # from mpl_toolkits.mplot3d import Axes3D
 # import mpl_toolkits.mplot3d.axes3d as p3
 import numpy as np
