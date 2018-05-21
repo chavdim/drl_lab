@@ -4,14 +4,14 @@ Facilitates experiments on deep reinforcement learning. Using OpenAi'gym
 
 ## Install
 ### Common
-```
+```bash
 cd /path/to/your/workspace
 git clone https://github.com/walkingmask/drl_lab.git
 cd drl_lab
 ```
 
 ### Local
-```
+```bash
 # require pyenv and pyenv-virtualenv
 pyenv install anaconda3-5.0.0
 pyenv virtualenv anaconda3-5.0.0 drl_lab
@@ -28,7 +28,7 @@ vim gym-ple/gym-ple/__init__.py
 ```
 
 ### Local Docker(Mac)
-```
+```bash
 # at local terminal
 bash docker/local/run
 open http://localhost:58888
@@ -39,7 +39,7 @@ vim gym-ple/gym-ple/__init__.py
 ```
 
 ### Remote Docker (with GeForce GT 730)
-```
+```bash
 # at remote terminal
 bash docker/remote_low/run
 # at local terminal
@@ -51,7 +51,7 @@ vim gym-ple/gym-ple/__init__.py
 ```
 
 ### Remote Docker (with GeForce GTX 1060)
-```
+```bash
 # at remote terminal
 bash docker/remote/run
 # at local terminal
@@ -64,13 +64,13 @@ vim gym-ple/gym-ple/__init__.py
 
 
 ## Tests
-```
+```bash
 python -m unittest discover
 ```
 
 
 ## Run
-```
+```bash
 python main.py --help                   # show helps
 python main.py                          # run as default
 python main.py --hparams ./hparams.py   # run using hparams.py
