@@ -3,32 +3,105 @@ Facilitates experiments on deep reinforcement learning. Using OpenAi'gym
 
 
 ## Install
+### Common
 ```
-docker exec -uroot -it container_id /bin/bash
-apt update
-apt install -y libsm6 libxext6 libxrender-dev
-```
-
-```
-git clone https://github.com/chavdim/drl_lab.git
+cd /path/to/your/workspace
+git clone https://github.com/walkingmask/drl_lab.git
 cd drl_lab
-git checkout -b redo origin/redo
-pip install scikit-image scikit-learn opencv-python imageio pygame
-git clone https://github.com/openai/gym.git && cd gym
-pip install -e . && cd ..
-git clone https://github.com/ntasfi/PyGame-Learning-Environment.git ./ple && cd ple
-pip install -e . && cd ..
-git clone https://github.com/lusob/gym-ple.git && cd gym-ple
-pip install -e . && cd ..
-cp ./games/breakout_pygame.py ./ple/ple/games/
-# add 'Breakout_pygame' in the list at line 5 of gym_ple/gym_ple/__init__.py
 ```
 
+### Local
 ```
-pip uninstall tensorflow-gpu
-pip install tensorflow-gpu==1.5
-apt-get update && apt-get install -y --allow-downgrades --no-install-recommends \
-    libcudnn7=7.0.4.31-1+cuda9.0 \
-    libcudnn7-dev=7.0.4.31-1+cuda9.0 && \
-    rm -rf /var/lib/apt/lists/*
+# require pyenv and pyenv-virtualenv
+pyenv install anaconda3-5.0.0
+pyenv virtualenv anaconda3-5.0.0 drl_lab
+pyenv local drl_lab
+pip install -U pip
+conda update -y conda
+pip install -r requirements.txt
+git clone https://github.com/openai/gym.git && cd gym && pip install -e . && cd ..
+git clone https://github.com/ntasfi/PyGame-Learning-Environment.git ./ple && cd ple && pip install -e . && cd ..
+git clone https://github.com/lusob/gym-ple.git && cd gym-ple && pip install -e . && cd ..
+cp games/breakout_pygame.py ple/ple/games/
+vim gym-ple/gym-ple/__init__.py
+# add 'Breakout_pygame' in the list at line 5
 ```
+
+### Local Docker(Mac)
+```
+# at local terminal
+bash docker/local/run
+open http://localhost:58888
+# at jupyter terminal
+cp drl_lab/games/breakout_pygame.py ple/ple/games/
+vim gym-ple/gym-ple/__init__.py
+# add 'Breakout_pygame' in the list at line 5
+```
+
+### Remote Docker (with GeForce GT 730)
+```
+# at remote terminal
+bash docker/remote_low/run
+# at local terminal
+open http://{remote_host}:58888
+# at jupyter terminal
+cp drl_lab/games/breakout_pygame.py ple/ple/games/
+vim gym-ple/gym-ple/__init__.py
+# add 'Breakout_pygame' in the list at line 5
+```
+
+### Remote Docker (with GeForce GTX 1060)
+```
+# at remote terminal
+bash docker/remote/run
+# at local terminal
+open http://{remote_host}:58888
+# at jupyter terminal
+cp drl_lab/games/breakout_pygame.py ple/ple/games/
+vim gym-ple/gym-ple/__init__.py
+# add 'Breakout_pygame' in the list at line 5
+```
+
+
+## Tests
+```
+python -m unittest discover
+```
+
+
+## Run
+```
+python main.py --help                   # show helps
+python main.py                          # run as default
+python main.py --hparams ./hparams.py   # run using hparams.py
+```
+
+
+## TODO
+- expt.py
+    - modeを追加
+        - learn
+        - run
+            - test_agentをtrueにして、1epsだけ、画像保存など
+- 用語の定義
+    - iterations?
+    - interval?
+- 役割の切り分け
+    - models.py: CNN model
+    - env.py   : Environment wrappers (state preprocessing)
+    - agents.py: RL Agents
+    - memory.py: memory for experience replay
+    - sim.py   : env+agent+memory
+    - expt.py  : sim+run_hparams+save
+    - gcam.py  : Grad-CAM
+    - main     : args
+- pixelcopter, breakout収束させる
+    - reward.npyや、画像を確認
+- gcamの実装
+    - テスト、画像で確認
+    - simに組み込み
+- 最適化
+    - 高速化できるならする
+- Action周り
+    - せっかくAction作ってるのだから
+    - action_indexisとか使わないでそれ使えないか？

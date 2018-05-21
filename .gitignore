@@ -1,4 +1,5 @@
-drl_lab/results/
+hparams.py
+results/
 
 
 ### VSCode ###

@@ -1,10 +1,10 @@
-flake8
 Keras
 matplotlib
 numpy
 scikit-image
 scikit-learn
-tensorflow-gpu
 opencv-python
 imageio
 pygame
+tensorflow
+
