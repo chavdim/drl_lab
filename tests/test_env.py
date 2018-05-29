@@ -13,7 +13,7 @@ from drl_lab.env import (
     rgb2gray,
 )
 from tests.common import (
-    array2image,
+    array2images,
     deepcopy,
     env_hparams,
     get_results_dir,
@@ -33,7 +33,7 @@ class TestEnv(unittest.TestCase):
         expected = Action
         self.assertEqual(expected, type(env.actions[0]))
         self.assertIsNone(env.last_obs)
-        self.assertIsNone(env.last_obs_rwa)
+        self.assertIsNone(env.last_obs_raw)
         self.assertIsNone(env.last_action)
         self.assertIsNone(env.last_action_raw)
 
@@ -41,9 +41,9 @@ class TestEnv(unittest.TestCase):
         array_rgb = np.random.randint(0, 255, [32, 32, 3])
         array_gray = rgb2gray(array_rgb)
         result_dir = get_results_dir()
-        image_rgb = array2image(array_rgb)[0]
+        image_rgb = array2images(array_rgb)[0]
         image_rgb.save(result_dir+'/test_rgb2gray_rgb.png')
-        image_gray = array2image(array_gray)[0]
+        image_gray = array2images(array_gray)[0]
         image_gray.save(result_dir+'/test_rgb2gray_gray.png')
 
     def test_draw_shadow(self):
@@ -78,7 +78,7 @@ class TestPreprocessedEnv(unittest.TestCase):
         expected = Action
         self.assertEqual(expected, type(env.actions[0]))
         self.assertIsNone(env.last_obs)
-        self.assertIsNone(env.last_obs_rwa)
+        self.assertIsNone(env.last_obs_raw)
         self.assertIsNone(env.last_action)
         self.assertIsNone(env.last_action_raw)
 
@@ -110,9 +110,9 @@ class TestPreprocessedEnv(unittest.TestCase):
         # check default settings
         observation = env.reset()
         # save image
-        observation_image = array2image(observation)[0]
+        observation_image = array2images(observation)[0]
         observation_image.save(result_dir+'/test_reset_obs.png')
-        self.assertTrue(np.array_equal(env.last_obs, env.last_obs_rwa))
+        self.assertTrue(np.array_equal(env.last_obs, env.last_obs_raw))
         expected = (48, 48, 3)
         self.assertEqual(expected, observation.shape)
         expected = 255
@@ -123,7 +123,7 @@ class TestPreprocessedEnv(unittest.TestCase):
         # enable normalization
         observation = env.reset(normalize=True)
         # save image
-        observation_image = array2image(observation)[0]
+        observation_image = array2images(observation)[0]
         observation_image.save(result_dir+'/test_reset_normalize.png')
         self.assertTrue(env.normalize)
         expected = 1.0
@@ -134,7 +134,7 @@ class TestPreprocessedEnv(unittest.TestCase):
         # enable opt_flow
         observation = env.reset(opt_flow=True)
         # save image
-        observation_image = array2image(observation)[0]
+        observation_image = array2images(observation)[0]
         observation_image.save(result_dir+'/test_reset_opt_flow.png')
         self.assertTrue(env.opt_flow)
 
@@ -146,7 +146,7 @@ class TestPreprocessedEnv(unittest.TestCase):
         observation = env.reset()
         observation, reward, done, info = env.step(0)
         # save image
-        observation_image = array2image(observation)[0]
+        observation_image = array2images(observation)[0]
         observation_image.save(result_dir+'/test_step_obs.png')
         expected = np.ndarray
         self.assertEqual(expected, type(observation))
@@ -169,7 +169,7 @@ class TestPreprocessedEnv(unittest.TestCase):
         observation = env.reset(normalize=True)
         observation, reward, done, info = env.step(0)
         # save image
-        observation_image = array2image(observation)[0]
+        observation_image = array2images(observation)[0]
         observation_image.save(result_dir+'/test_step_normalize.png')
         expected = np.ndarray
         self.assertEqual(expected, type(observation))
@@ -184,7 +184,7 @@ class TestPreprocessedEnv(unittest.TestCase):
         observation = env.reset(opt_flow=True)
         observation, reward, done, info = env.step(0)
         # save image
-        observation_image = array2image(observation)[0]
+        observation_image = array2images(observation)[0]
         observation_image.save(result_dir+'/test_step_opt_flow.png')
         expected = np.ndarray
         self.assertEqual(expected, type(observation))
@@ -208,7 +208,7 @@ class TestPreprocessedEnv(unittest.TestCase):
         expected = (60, 60, 3)
         self.assertEqual(expected, observation.shape)
         # save image
-        observation_img = array2image(observation)[0]
+        observation_img = array2images(observation)[0]
         observation_img.save(result_dir+'/test_rescale.png')
 
     def test_action(self):
@@ -248,14 +248,14 @@ class TestPreprocessedEnv(unittest.TestCase):
         observation = env.env.reset()
         observation = env.observation(observation)
         # save image
-        observation_image = array2image(observation)[0]
+        observation_image = array2images(observation)[0]
         observation_image.save(result_dir+'/test_observation.png')
         expected = np.ndarray
         self.assertEqual(expected, type(observation))
         expected = 'uint8'
         self.assertEqual(expected, str(observation.dtype))
         observation[0, 0, 0] = 300.0
-        self.assertFalse(np.array_equal(observation, env.last_obs_rwa))
+        self.assertFalse(np.array_equal(observation, env.last_obs_raw))
         self.assertFalse(np.array_equal(observation, env.last_obs))
 
         # enable rescale
@@ -266,7 +266,7 @@ class TestPreprocessedEnv(unittest.TestCase):
         observation = env.env.reset()
         observation = env.observation(observation)
         # save image
-        observation_image = array2image(observation)[0]
+        observation_image = array2images(observation)[0]
         observation_image.save(result_dir+'/test_observation_rescale.png')
         expected = (60, 60, 3)
         self.assertEqual(expected, observation.shape)
@@ -276,7 +276,7 @@ class TestPreprocessedEnv(unittest.TestCase):
         env.normalize = True
         observation = env.observation(observation)
         # save image
-        observation_image = array2image(observation)[0]
+        observation_image = array2images(observation)[0]
         observation_image.save(result_dir+'/test_observation_normalize.png')
         expected = 1.0
         self.assertTrue(expected >= observation.max())
@@ -288,7 +288,7 @@ class TestPreprocessedEnv(unittest.TestCase):
         env.opt_flow = True
         observation = env.observation(observation)
         # save image
-        observation_image = array2image(observation)[0]
+        observation_image = array2images(observation)[0]
         observation_image.save(result_dir+'/test_observation_opt_flow.png')
         expected = (60, 60, 3)
         self.assertEqual(expected, observation.shape)

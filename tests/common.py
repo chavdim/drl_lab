@@ -3,7 +3,7 @@ import numpy as np
 import os
 
 from drl_lab.env import Action
-from drl_lab.sim import array2image, save_gif  # NOQA
+from drl_lab.expt import array2images, save_images  # NOQA
 
 
 # dependent variables
@@ -60,12 +60,12 @@ state = np.random.randn(*state_shape)
 states = np.random.randn(32, *state_shape)
 
 
-def get_resource_dir():
+def get_resources_dir():
     here = os.path.dirname(os.path.realpath(__file__))
-    resource_root = here+'/resource'
-    if not os.path.exists(resource_root):
-        raise FileNotFoundError(resource_root)
-    return resource_root
+    resources_root = here+'/resources'
+    if not os.path.exists(resources_root):
+        raise FileNotFoundError(resources_root)
+    return resources_root
 
 
 def get_results_dir():

@@ -8,6 +8,7 @@ import matplotlib as mpl
 mpl.use('SVG')  # NOQA
 import matplotlib.pyplot as plt
 import numpy as np
+from PIL import Image
 
 from drl_lab.sim import Simulator
 
@@ -18,7 +19,7 @@ class Experiment():
         self.name = name+'_'+datetime.now(JST).strftime('%Y%m%d%H%M%S')
 
     def run(self, env_hparams, run_hparams, nn_hparams):
-        simulator = Simulator(env_hparams, run_hparams, nn_hparams)
+        simulator = Simulator(env_hparams, nn_hparams)
 
         interval = run_hparams['interval']
         num_runs = run_hparams['num_runs']
@@ -40,7 +41,7 @@ class Experiment():
             self.save_hparams(env_hparams, run_hparams, nn_hparams)
             self.save_current_model(simulator.agent.nn.nn, step_num='init')
 
-        for num_run in range(num_runs, 0, -1):
+        for num_run in range(1, num_runs+1):
             self._run(simulator, interval, max_steps,
                       num_run, save, save_at, verbose)
 
@@ -103,15 +104,18 @@ class Experiment():
         results_root = here+'/results/'+self.name
         reward_results = results_root+'/rewards'
         model_results = results_root+'/models'
+        # image_results = results_root+'/images'
+        # for d in [results_root, reward_results, model_results, image_results]:
         for d in [results_root, reward_results, model_results]:
             if not os.path.exists(d):
                 os.makedirs(d)
         self.results_root = results_root
         self.reward_results = reward_results
         self.model_results = model_results
+        # self.image_results = image_results
 
     def save_hparams(self, env_hparams, run_hparams, nn_hparams):
-        with open(self.results_root+'/params.py', 'w') as f:
+        with open(self.results_root+'/hparams.py', 'w') as f:
             f.write('env_hparams = ')
             pprint(env_hparams, stream=f)
             f.write('run_hparams = ')
@@ -131,6 +135,14 @@ class Experiment():
             path += '_'+str(step_num)
         model.save(path, include_optimizer=True)
 
+    def save_array_as_images(self, array, name,
+                             prefix='image', save_gif=True):
+        save_path = "{}/{}".format(self.image_results, name)
+        if not os.path.exists(save_path):
+            os.makedirs(save_path)
+        images = array2images(array)
+        save_images(save_path, images, prefix, save_gif)
+
     def plot_results(self):
         for i in range(1, self.num_runs+1):
             res = np.load(self.reward_results+'/rewards_'+str(i)+'.npy')
@@ -144,3 +156,49 @@ class Experiment():
                        self.interval),
                  np.mean(average_res, axis=1))
         plt.savefig(self.results_root+'/results.png')
+
+
+def array2images(array, warning=True):
+    """
+    Notes
+    -----
+    uint8 is recommended for array.
+    """
+
+    if type(array) == list:
+        array = np.array(array)
+    if array.ndim < 4:
+        array = array.reshape(1, *array.shape)
+
+    images = []
+
+    for _array in array:
+        deprocessed = '|'
+        if _array.min() < 0.0:
+            _array = _array - _array.min()
+            deprocessed += '| -min |'
+        if _array.max() > 255:
+            _array = _array / _array.max()
+            deprocessed += '| /max |'
+        if _array.max() <= 1.0:
+            _array = _array * 255
+            deprocessed += '| *255 |'
+        if _array.dtype != np.uint8:
+            _array = np.uint8(_array)
+            deprocessed += '| uint() ||'
+        if warning and deprocessed is not '|':
+            print("***** Waring *****: array deprocessed: "+deprocessed)
+        images.append(Image.fromarray(_array))
+
+    return images
+
+
+def save_images(save_dir, images, prefix='image', save_gif=True):
+    for i, image in enumerate(images):
+        save_name = "{}/{}_{:04d}.png".format(save_dir, prefix, i)
+        image.save(save_name)
+
+    if save_gif:
+        save_name = "{}/{}.gif".format(save_dir, prefix)
+        images[0].save(save_name, save_all=True, append_images=images[1:],
+                       optimize=False, duration=50, loop=0)

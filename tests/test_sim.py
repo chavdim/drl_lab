@@ -2,11 +2,8 @@ import unittest
 
 from drl_lab.sim import Simulator
 from tests.common import (
-    array2image,
     env_hparams,
-    get_results_dir,
     nn_hparams,
-    save_gif,
 )
 
 
@@ -89,40 +86,3 @@ class TestSimulator(unittest.TestCase):
         results = sim.run_repeatedly(num_runs=10, iterations=-1, update=False)
         expected = 10
         self.assertEqual(expected, len(results))
-
-
-class TestSim(unittest.TestCase):
-    def setUp(self):
-        self.sim = Simulator(env_hparams, nn_hparams)
-
-    def test_array2image(self):
-        env = self.sim.env
-
-        observation = env.reset()
-        image = array2image(observation)
-        expected = 1
-        self.assertEqual(expected, len(image))
-        expected = "<class 'PIL.Image.Image'>"
-        self.assertEqual(expected, str(type(image[0])))
-
-        observations = []
-        for i in range(10):
-            observation, _, _, _ = env.step(1)
-            observations.append(env.reset())
-        images = array2image(observations)
-        expected = 10
-        self.assertEqual(expected, len(images))
-        expected = "<class 'PIL.Image.Image'>"
-        self.assertEqual(expected, str(type(image[0])))
-
-    def test_save_gif(self):
-        results_dir = get_results_dir()
-        env = self.sim.env
-
-        observations = []
-        env.reset()
-        for i in range(10):
-            observation, _, _, _ = env.step(1)
-            observations.append(observation)
-        images = array2image(observations)
-        save_gif(results_dir, 'test_save_gif', images, True)

@@ -2,13 +2,13 @@ import unittest
 
 import keras
 
-from drl_lab.models import QCNN, dataset2XY, state2data
+from drl_lab.models import QCNN, dataset2XY, state2data, load_model
 from tests.common import (
     batch_size,
     dataset,
     dataset_num,
     deepcopy,
-    get_resource_dir,
+    get_resources_dir,
     nn_hparams,
     num_actions,
     os,
@@ -126,27 +126,6 @@ class TestQCNN(unittest.TestCase):
         qcnn.nn.set_weights(qcnn_weights)
         self.assertFalse(weights_equal(qcnn.nn, target))
 
-    def test_load_model(self):
-        qcnn = self.qcnn
-        resource_root = get_resource_dir()
-        test_model = resource_root+'/test_model'
-        if not os.path.exists(test_model):
-            raise FileNotFoundError(test_model)
-
-        nn_before = keras.models.clone_model(qcnn.nn)
-        nn_before.set_weights(qcnn.nn.get_weights())
-        qcnn.load_model(test_model)
-        nn_after = qcnn.nn
-        self.assertFalse(weights_equal(nn_before, nn_after))
-
-        _nn_hparams = deepcopy(nn_hparams)
-        _nn_hparams['saved_model'] = test_model
-        nn_before = keras.models.clone_model(qcnn.nn)
-        nn_before.set_weights(qcnn.nn.get_weights())
-        qcnn = QCNN(state_shape, num_actions, _nn_hparams)  # init
-        nn_after = qcnn.nn
-        self.assertTrue(weights_equal(nn_before, nn_after))
-
 
 class TestModel(unittest.TestCase):
     def test_dataset2XY(self):
@@ -161,3 +140,20 @@ class TestModel(unittest.TestCase):
     def test_state2data(self):
         data = state2data(state)
         self.assertEqual(data.shape, (1, *state_shape))
+
+    def test_load_model(self):
+        resources_root = get_resources_dir()
+        test_model = resources_root+'/test_model'
+        if not os.path.exists(test_model):
+            raise FileNotFoundError(test_model)
+
+        nn = load_model(test_model)
+        expected = "<class 'keras.models.Sequential'>"
+        self.assertTrue(expected, str(type(nn)))
+
+        _nn_hparams = deepcopy(nn_hparams)
+        _nn_hparams['saved_model'] = test_model
+        qcnn = QCNN(state_shape, num_actions, _nn_hparams)
+        expected = "<class 'keras.models.Sequential'>"
+        self.assertTrue(expected, str(type(qcnn.nn)))
+        # TODO: more a more detailed test

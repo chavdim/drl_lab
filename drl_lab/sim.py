@@ -1,8 +1,6 @@
-import os
 import time
 
 import numpy as np
-from PIL import Image
 
 from drl_lab.env import create_env
 from drl_lab.memory import Memory
@@ -116,35 +114,3 @@ class Simulator:
                 self.run(
                     test_agent=False, update=update, iterations=iterations))
         return results
-
-
-def array2image(array):
-    if type(array) is not list:
-        array = [array]
-
-    images = []
-
-    for _array in array:
-        if _array.max() <= 1.0:
-            _array = _array * 255
-        if _array.min() < 0.0 and 255 < _array.max():
-            raise ValueError('array2image: invalid array')
-        if _array.dtype != np.uint8:
-            _array = np.uint8(_array)
-        images.append(Image.fromarray(_array))
-
-    return images
-
-
-def save_gif(save_dir, name, images, save_images=False):
-    save_name = "{}/{}.gif".format(save_dir, name)
-    images[0].save(save_name, save_all=True, append_images=images[1:],
-                   optimize=False, duration=50, loop=0)
-
-    if save_images:
-        image_dir = "{}/{}".format(save_dir, name)
-        if not os.path.exists(image_dir):
-            os.mkdir(image_dir)
-        for i, image in enumerate(images):
-            save_name = "{}/{:04d}.png".format(image_dir, i)
-            image.save(save_name)

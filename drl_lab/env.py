@@ -72,7 +72,7 @@ class PreprocessedEnv(gym.Wrapper):
                 del kwargs[kw]
 
         self.last_obs = None
-        self.last_obs_rwa = None
+        self.last_obs_raw = None
 
         self.last_action = None
         self.last_action_raw = None
@@ -95,7 +95,7 @@ class PreprocessedEnv(gym.Wrapper):
         return self.actions[action].name
 
     def observation(self, observation):
-        self.last_obs_rwa = np.copy(observation)
+        self.last_obs_raw = np.copy(observation)
         if self.rescale:
             observation = sk_rescale(observation, self.zoom)
         if self.opt_flow:

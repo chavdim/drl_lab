@@ -2,13 +2,20 @@ import re
 import shutil
 import unittest
 
-from drl_lab.expt import Experiment
+from drl_lab.env import create_env
+from drl_lab.expt import (
+    Experiment,
+    array2images,
+    save_images,
+)
 from tests.common import (
     deepcopy,
     env_hparams,
     get_results_dir,
     nn_hparams,
     os,
+    state,
+    states,
     run_hparams,
 )
 
@@ -69,7 +76,7 @@ class TestExperiment(unittest.TestCase):
         self.assertTrue(
             os.path.exists(results_dir_expt+'/models'))
         self.assertTrue(
-            os.path.exists(results_dir_expt+'/params.py'))
+            os.path.exists(results_dir_expt+'/hparams.py'))
         self.assertTrue(
             os.path.exists(results_dir_expt+'/models/model_init'))
         self.assertTrue(
@@ -100,6 +107,38 @@ class TestExperiment(unittest.TestCase):
         # combined to test_run
         pass
 
+    # TODO: this
+    def test_save_array_as_image(self):
+        pass
+
     def test_plot_results(self):
         # combined to test_run
         pass
+
+
+class TestExpt(unittest.TestCase):
+    def test_array2images(self):
+        image = array2images(state)
+        expected = list
+        self.assertEqual(expected, type(image))
+        expected = 1
+        self.assertEqual(expected, len(image))
+        expected = "<class 'PIL.Image.Image'>"
+        self.assertEqual(expected, str(type(image[0])))
+        images = array2images(states)
+        expected = len(states)
+        self.assertEqual(expected, len(images))
+
+    def test_save_images(self):
+        results_root = get_results_dir()
+        results_dir = "{}/{}".format(results_root, 'test_save_images')
+        if not os.path.exists(results_dir):
+            os.mkdir(results_dir)
+        observations = []
+        env = create_env(env_hparams)
+        env.reset()
+        for i in range(10):
+            observation, _, _, _ = env.step(1)
+            observations.append(observation)
+        images = array2images(observations)
+        save_images(results_dir, images)

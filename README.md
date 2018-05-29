@@ -78,14 +78,30 @@ python main.py --hparams ./hparams.py   # run using hparams.py
 
 
 ## TODO
+- gcamの実装
+    - simに組み込み
+        - テスト、RLで
+        - learning faseとtesting? faseがある
+            - learning faseでは、modelのパラメータ(あるいはmodel)自体をガンガン保存して行く
+                - 現状、model自体が軽いので、とりあえずぽんぽん保存して行っていいと思う
+            - testing faseでは、保存した全てのパラメータでforを回す
+                - episode_modeで
+                - 10 epsくらいとか
+                - epsの画像を全て保存
+                - 保存した画像をagentに食わせてforward_propしてgcamして保存
+            - 現状はflagで切り替えている
+            - if test_agent:
+                - 
+- pixelcopter, breakout収束させる
+    - reward.npyや、画像を確認
+- 用語の定義
+    - iterations?
+    - interval?
 - expt.py
     - modeを追加
         - learn
         - run
             - test_agentをtrueにして、1epsだけ、画像保存など
-- 用語の定義
-    - iterations?
-    - interval?
 - 役割の切り分け
     - models.py: CNN model
     - env.py   : Environment wrappers (state preprocessing)
@@ -95,13 +111,20 @@ python main.py --hparams ./hparams.py   # run using hparams.py
     - expt.py  : sim+run_hparams+save
     - gcam.py  : Grad-CAM
     - main     : args
-- pixelcopter, breakout収束させる
-    - reward.npyや、画像を確認
-- gcamの実装
-    - テスト、画像で確認
-    - simに組み込み
 - 最適化
     - 高速化できるならする
 - Action周り
     - せっかくAction作ってるのだから
     - action_indexisとか使わないでそれ使えないか？
+- epsilonの調整
+    - 28000stepで0.04まで下がってしまってる
+    - もう少し下げ方調整していい感じにできないだろうか
+
+
+## Issues
+- grad-camについて
+    - QCNNを使ってMNISTをgcamして見たが、望ましい結果は得られなかった
+    - 小さい画像に対して弱い？
+    - guidedについては全くダメだった
+    - VGG16以外で使いにくい？
+    - どのlayerを選ぶかと言うハイパーパラメータが煩わしい
