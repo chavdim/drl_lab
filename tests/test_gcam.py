@@ -4,6 +4,7 @@ import tensorflow as tf
 
 from drl_lab.env import create_env
 from drl_lab.gcam import (
+    colorize_cam,
     K,
     grad_cam,
     normalize,
@@ -34,7 +35,8 @@ class TestGCAM(unittest.TestCase):
         model = load_model(test_model)
         cams = []
         for i in range(2):
-            cam, _ = grad_cam(model, state.reshape(1, *state.shape), i, 4, 2)
+            cam = grad_cam(model, state.reshape(1, *state.shape), i, 4, 2)
+            cam = colorize_cam(cam, state)
             cams.append(cam)
         images = array2images(cams)
         results_root = get_results_dir()
@@ -48,9 +50,11 @@ class TestGCAM(unittest.TestCase):
         env.reset()
         for i in range(10):
             observation, _, _, _ = env.step(1)
-            observation = observation.reshape(1, *observation.shape)
-            cam0, _ = grad_cam(model, observation, 0, 4, 2)
-            cam1, _ = grad_cam(model, observation, 1, 4, 2)
+            _observation = observation.reshape(1, *observation.shape)
+            cam0 = grad_cam(model, _observation, 0, 4, 2)
+            cam0 = colorize_cam(cam0, observation)
+            cam1 = grad_cam(model, _observation, 1, 4, 2)
+            cam1 = colorize_cam(cam1, observation)
             cams.append(np.concatenate([cam0, cam1], axis=1))
         images = array2images(cams)
         results_dir = "{}/{}".format(results_root, 'test_grad_cam2')
@@ -87,3 +91,7 @@ class TestGCAM(unittest.TestCase):
         expected = state_shape
         self.assertEqual(
             expected, target_category_loss_output_shape(state_shape))
+
+    # TODO: this
+    def test_colorize_cam(self):
+        pass

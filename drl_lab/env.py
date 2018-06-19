@@ -97,10 +97,12 @@ class PreprocessedEnv(gym.Wrapper):
     def observation(self, observation):
         self.last_obs_raw = np.copy(observation)
         if self.rescale:
-            observation = sk_rescale(observation, self.zoom)
+            observation = sk_rescale(
+                observation, self.zoom, preserve_range=True)
         if self.opt_flow:
             observation = self.optical_flow(observation)
         if self.normalize:
+            # TODO: /255 to (/127.5)-1
             observation = observation/255.0
         self.last_obs = np.copy(observation)
         return observation

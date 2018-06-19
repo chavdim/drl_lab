@@ -140,7 +140,7 @@ class Experiment():
         save_path = "{}/{}".format(self.image_results, name)
         if not os.path.exists(save_path):
             os.makedirs(save_path)
-        images = array2images(array)
+        images = arrays2images(array)
         save_images(save_path, images, prefix, save_gif)
 
     def plot_results(self):
@@ -158,47 +158,60 @@ class Experiment():
         plt.savefig(self.results_root+'/results.png')
 
 
-def array2images(array, warning=True):
+def deprocess(array, warning=True):
+    if type(array) != np.ndarray:
+        raise TypeError('deprocess: np.ndarray is required.')
+
+    deprocessed_array = np.copy(array)
+    deprocessed = '|'
+
+    if deprocessed_array.min() < 0.0:
+        deprocessed_array = deprocessed_array - deprocessed_array.min()
+        deprocessed += '| -min |'
+    if deprocessed_array.max() > 255:
+        deprocessed_array = deprocessed_array / deprocessed_array.max()
+        deprocessed += '| /max |'
+    if deprocessed_array.max() <= 1.0:
+        deprocessed_array = deprocessed_array * 255
+        deprocessed += '| *255 |'
+    if deprocessed_array.dtype != np.uint8:
+        deprocessed_array = np.uint8(deprocessed_array)
+        deprocessed += '| uint() ||'
+
+    if warning and deprocessed is not '|':
+        print("***** Waring *****: array deprocessed: "+deprocessed)
+
+    return deprocessed_array
+
+
+def bulk_deprocess(arrays, warning=True):
+    deprocessed_arrays = []
+    for array in arrays:
+        deprocessed_arrays.append(deprocess(array, warning))
+    return deprocessed_arrays
+
+
+def array2image(array):
+    return Image.fromarray(array)
+
+
+def arrays2images(arrays):
     """
     Notes
     -----
     uint8 is recommended for array.
     """
-
-    if type(array) == list:
-        array = np.array(array)
-    if array.ndim < 4:
-        array = array.reshape(1, *array.shape)
-
-    images = []
-
-    for _array in array:
-        deprocessed = '|'
-        if _array.min() < 0.0:
-            _array = _array - _array.min()
-            deprocessed += '| -min |'
-        if _array.max() > 255:
-            _array = _array / _array.max()
-            deprocessed += '| /max |'
-        if _array.max() <= 1.0:
-            _array = _array * 255
-            deprocessed += '| *255 |'
-        if _array.dtype != np.uint8:
-            _array = np.uint8(_array)
-            deprocessed += '| uint() ||'
-        if warning and deprocessed is not '|':
-            print("***** Waring *****: array deprocessed: "+deprocessed)
-        images.append(Image.fromarray(_array))
+    images = [array2image(array) for array in arrays]
 
     return images
 
 
-def save_images(save_dir, images, prefix='image', save_gif=True):
+def save_images(save_dir, images, prefix='image'):
     for i, image in enumerate(images):
         save_name = "{}/{}_{:04d}.png".format(save_dir, prefix, i)
         image.save(save_name)
 
-    if save_gif:
-        save_name = "{}/{}.gif".format(save_dir, prefix)
-        images[0].save(save_name, save_all=True, append_images=images[1:],
-                       optimize=False, duration=50, loop=0)
+
+def save_gif(save_path, images):
+    images[0].save(save_path, save_all=True, append_images=images[1:],
+                   optimize=False, duration=50, loop=0)
