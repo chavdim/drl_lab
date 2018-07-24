@@ -1,9 +1,14 @@
 # https://github.com/vense/keras-grad-cam
 
+import os
+import tempfile
+
 import cv2
 import keras
+from keras import activations
 from keras import backend as K
 from keras.layers.core import Lambda
+from keras.models import load_model
 import numpy as np
 import tensorflow as tf
 
@@ -20,6 +25,16 @@ def target_category_loss_output_shape(input_shape):
     return input_shape
 
 
+def apply_modifications(model):
+    model_path = os.path.join(
+        tempfile.gettempdir(), next(tempfile._get_candidate_names()) + '.h5')
+    try:
+        model.save(model_path)
+        return load_model(model_path)
+    finally:
+        os.remove(model_path)
+
+
 class GradCam:
     def __init__(self, input_model, category_index, layer_index, nb_classes):
         """
@@ -32,6 +47,10 @@ class GradCam:
         """
         def target_layer(x):
             return target_category_loss(x, category_index, nb_classes)
+
+        # modify last layer activation to softmax
+        input_model.layers[-1].activation = activations.softmax
+        input_model = apply_modifications(input_model)
 
         x = input_model.layers[-1].output
         x = Lambda(

@@ -127,36 +127,26 @@ python main.py --hparams ./hparams.py   # run using hparams.py
     - guidedについては全くダメだった
     - VGG16以外で使いにくい？
     - どのlayerを選ぶかと言うハイパーパラメータが煩わしい
+        - 論文だと最終畳み込み層だけど
 - skimage.transform.rescaleについて
     - 戻り値がrange=(0.0, 1.0),dtype=np.float64になって帰ってくる
     - これは想定外の挙動
     - preserve_range=Trueでrangeは変えないでおけるぽい
         - envに適用済み
     - resizeも存在する
-- grad-cam遅すぎる
-    - メモリリークしてるっぽい
-        - https://qiita.com/shunsukeaihara/items/05a4cd38f61f8a6fffa3
-        - divisionbyzeroが原因？
-        - 1e-10を1e-5にして様子見てみる
-    - 画像一枚ずつ保存して、gif化するモジュールは後で使う方針がいいかも
-        - 進捗確認もしやすい
-- deprocessをenvに実装
 - 可視化関数をモジュール式にしていくつもの可視化を試せるように
-- 行動出力を加える
-    - pillowじゃなくてmatplotlib使おう
-    - https://qiita.com/msrks/items/e264872efa062c7d6955
-    - https://qiita.com/yubais/items/c95ba9ff1b23dd33fde2
 - Q値は0-1じゃないよね
     - linear出力
-    - 確認しないとわからない
-    - vgg16とかは0-1
-    - それによる影響は？
-    - A3Cも同じような感じだったし、もしかしてDRLはこうなる？
-        - 最終層の出力の分布がどの入力に対しても似通っていると言うことは、とても微妙な差で判断している
-        - とすると、ほとんどの特徴が無駄になっている？
+        - パッと見た限り -0.xx ~ 1.xx あった
+    - vgg16とかは0-1(softmax)
+    - それによる影響は？ありそう
+        - あった
+        - gcamにかける前にmodelのlayers[-1].activationをsoftmaxに変更
+        - gcamの結果めっちゃ変わった
+        - けど、softmaxに変えていいものだろうか？
 - grad-camはnegative contributionも反映してる？
     - つまり他クラスに分類される根拠を青くハイライトする？
     - 論文にはそう書いてあるぽい
     - けど見た感じそうなってるか微妙
-    - Q値だからなのか
+    - Q値だからなのか？
 
