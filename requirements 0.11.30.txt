@@ -1,0 +1,9 @@
+imageio==2.2.0
+Keras==2.1.6
+matplotlib==2.0.2
+numpy==1.14.3
+opencv-python==3.4.1.15
+pygame==1.9.4
+scikit-image==0.13.0
+scikit-learn==0.19.0
+tensorflow==1.8.0

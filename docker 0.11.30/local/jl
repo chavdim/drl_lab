@@ -1,0 +1,7 @@
+#!/bin/bash
+set -eu
+
+SHELL=/bin/bash $HOME/.pyenv/versions/anaconda3-5.0.0/bin/jupyter lab \
+--config=$HOME/.jupyter/jupyter_notebook_config.py
+
+exit 0
