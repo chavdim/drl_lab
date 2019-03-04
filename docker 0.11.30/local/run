@@ -1,0 +1,15 @@
+here=$(cd $(dirname $0) && pwd)
+
+U_NAME=$USER
+
+docker build \
+-t drl-lab:latest $here \
+--build-arg U_NAME=$U_NAME
+
+docker run \
+-p 58888:8888 \
+-p 56006:6006 \
+-v $here/../..:/home/$U_NAME/drl-lab \
+-u $U_NAME \
+--name drl-lab \
+-d drl-lab:latest /usr/local/bin/jl

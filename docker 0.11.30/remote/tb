@@ -1,0 +1,4 @@
+#!/bin/bash
+set -eu
+
+$HOME/.pyenv/versions/anaconda3-5.0.0/bin/tensorboard $@
